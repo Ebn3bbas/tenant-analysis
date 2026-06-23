@@ -1,9 +1,5 @@
 # Tenant Analytics — Decisions & Tradeoffs (living ledger)
 
-> Working doc. Raw material for the **Loom video (Task 1)** and the README
-> "Decisions & Tradeoffs" section. Refine before submission; delete the TODO
-> bookkeeping rows.
-
 ## Stack
 - **Vite + React 18 + TS (strict)** — fastest loop, no framework opinion, own the URL-state plumbing (shows skill).
 - **TanStack Query v5** — owns server state; no `useEffect` for fetching.
@@ -27,7 +23,7 @@
 
 **Task 1 requirements 1–4: all implemented + browser-verified.** Remaining = demo aids + polish + Loom (see TODOs).
 
-## Decisions & tradeoffs (the Loom/README gold)
+## Decisions & tradeoffs
 | Decision | Why | Trade-off |
 |---|---|---|
 | **Schema-as-data** (rows = `{id, cells: Record<ColumnId, CellValue>}`), not concrete per-tenant types | Multi-tenant platforms store schema as data; one generic table renders any tenant; RBAC can reference column ids | Lose per-field static types; bought back safety with the closed `CellValue` union |
@@ -41,22 +37,15 @@
 | **Unclean 1006 drop vs clean 1000 close** | Reconnect/backoff only on unclean drop, never on intentional client close | Slight protocol nuance |
 | **Two repos (Analytics / Kanban)** | Two distinct deliverables + stacks (Kanban adds @dnd-kit) | Two repos to manage |
 
-## Pending TODOs (clear before submit)
-- [ ] Add explicit `@typescript-eslint/no-explicit-any: 'error'` to eslint config
-- [ ] Decide stale-status (steer: derive from `status !== 'open'`)
-- [ ] `placeholderData` confirming comment in `useTenantRows`
-- [ ] `mockWebSocket.nextRowUpdate` + `parseServerMessage` bodies
-- [ ] Remove `console.log` in `api.ts` before submit
-- [ ] TenantSwitcher button polish (rounded/padding/transition)
 
-## Debugging story (good Loom material)
+## Debugging story 
 - Symptom: "slow fetch", switch frozen, React Fast Refresh `Maximum call stack size exceeded`.
 - Diagnosis: measured the DOM — **10,000 `<tr>` rendered**, scroll container `clientHeight === scrollHeight === 400040px`. Virtualization was dead.
 - Root cause: a `flex items-center justify-center` wrapper removed the table's height constraint → `overflow-auto` never clamped → virtualizer saw a 400,000px viewport → rendered all rows; the huge fiber tree then overflowed Fast Refresh's recursive walk on save.
 - Fix: drop the centering wrapper so the table's `flex-1 min-h-0 overflow-auto` is bounded by the `h-screen` column. Result: 33 DOM rows.
 - Lesson: virtualization correctness depends on the SCROLL CONTAINER having a bounded height — verify with `clientHeight < scrollHeight`, not by eye.
 
-## Loom talking points (5-min budget — full script later)
+## Loom talking points 
 1. Architecture tour: feature-first folders, strict TS, no `any`.
 2. **Headline:** tenant switch cancels in-flight request — show DevTools + abort log.
 3. Schema-as-data + branded ids (30s).
